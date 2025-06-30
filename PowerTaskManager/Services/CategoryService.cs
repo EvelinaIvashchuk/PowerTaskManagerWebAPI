@@ -5,15 +5,8 @@ using PowerTaskManager.Services.Interfaces;
 
 namespace PowerTaskManager.Services;
 
-public class CategoryService : ICategoryService
+public class CategoryService(IUnitOfWork unitOfWork) : ICategoryService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    
-    public CategoryService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
-    
     public async Task<ApiResponseDto<PagedResponseDto<CategoryDto>>> GetAllCategoriesAsync(CategoryQueryParameters parameters)
     {
         try
@@ -51,10 +44,10 @@ public class CategoryService : ICategoryService
             }
             
             // Get total count
-            var totalCount = await _unitOfWork.Categories.CountAsync(filter);
+            var totalCount = await unitOfWork.Categories.CountAsync(filter);
             
             // Get paginated data
-            var categories = await _unitOfWork.Categories.GetAsync(
+            var categories = await unitOfWork.Categories.GetAsync(
                 filter,
                 orderBy,
                 "Tasks",
@@ -93,7 +86,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var category = await _unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Id == id, "Tasks");
+            var category = await unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Id == id, "Tasks");
             
             if (category == null)
             {
@@ -121,7 +114,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var category = await _unitOfWork.Categories.GetCategoryWithTasksAsync(id);
+            var category = await unitOfWork.Categories.GetCategoryWithTasksAsync(id);
             
             if (category == null)
             {
@@ -150,7 +143,7 @@ public class CategoryService : ICategoryService
         try
         {
             // Check if category with the same name already exists
-            var existingCategory = await _unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Name == createCategoryDto.Name);
+            var existingCategory = await unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Name == createCategoryDto.Name);
             
             if (existingCategory != null)
             {
@@ -165,8 +158,8 @@ public class CategoryService : ICategoryService
                 Color = createCategoryDto.Color
             };
             
-            await _unitOfWork.Categories.AddAsync(category);
-            await _unitOfWork.SaveAsync();
+            await unitOfWork.Categories.AddAsync(category);
+            await unitOfWork.SaveAsync();
             
             var categoryDto = new CategoryDto
             {
@@ -189,7 +182,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            var category = await unitOfWork.Categories.GetByIdAsync(id);
             
             if (category == null)
             {
@@ -199,7 +192,7 @@ public class CategoryService : ICategoryService
             // Check if name is being updated and if it already exists
             if (!string.IsNullOrEmpty(updateCategoryDto.Name) && updateCategoryDto.Name != category.Name)
             {
-                var existingCategory = await _unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Name == updateCategoryDto.Name);
+                var existingCategory = await unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Name == updateCategoryDto.Name);
                 
                 if (existingCategory != null)
                 {
@@ -220,11 +213,11 @@ public class CategoryService : ICategoryService
                 category.Color = updateCategoryDto.Color;
             }
             
-            _unitOfWork.Categories.Update(category);
-            await _unitOfWork.SaveAsync();
+            unitOfWork.Categories.Update(category);
+            await unitOfWork.SaveAsync();
             
             // Get updated category with tasks
-            var updatedCategory = await _unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Id == id, "Tasks");
+            var updatedCategory = await unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Id == id, "Tasks");
             
             var categoryDto = new CategoryDto
             {
@@ -247,7 +240,7 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            var category = await _unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Id == id, "Tasks");
+            var category = await unitOfWork.Categories.GetFirstOrDefaultAsync(c => c.Id == id, "Tasks");
             
             if (category == null)
             {
@@ -260,8 +253,8 @@ public class CategoryService : ICategoryService
                 return ApiResponseDto<bool>.Failure($"Cannot delete category with ID {id} because it has associated tasks");
             }
             
-            _unitOfWork.Categories.Remove(category);
-            await _unitOfWork.SaveAsync();
+            unitOfWork.Categories.Remove(category);
+            await unitOfWork.SaveAsync();
             
             return ApiResponseDto<bool>.Success(true, "Category deleted successfully");
         }

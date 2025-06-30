@@ -8,22 +8,15 @@ namespace PowerTaskManager.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class TaskItemController : ControllerBase
+public class TaskItemController(ITaskItemService taskItemService) : ControllerBase
 {
-    private readonly ITaskItemService _taskItemService;
-    
-    public TaskItemController(ITaskItemService taskItemService)
-    {
-        _taskItemService = taskItemService;
-    }
-    
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetAllTasks([FromQuery] TaskItemQueryParameters parameters)
     {
-        var response = await _taskItemService.GetAllTasksAsync(parameters);
+        var response = await taskItemService.GetAllTasksAsync(parameters);
         
         if (!response.IsSuccess)
         {
@@ -39,7 +32,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTaskById(int id)
     {
-        var response = await _taskItemService.GetTaskByIdAsync(id);
+        var response = await taskItemService.GetTaskByIdAsync(id);
         
         if (!response.IsSuccess)
         {
@@ -55,7 +48,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTasksByUserId(string userId)
     {
-        var response = await _taskItemService.GetTasksByUserIdAsync(userId);
+        var response = await taskItemService.GetTasksByUserIdAsync(userId);
         
         if (!response.IsSuccess)
         {
@@ -71,7 +64,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTasksByCategoryId(int categoryId)
     {
-        var response = await _taskItemService.GetTasksByCategoryIdAsync(categoryId);
+        var response = await taskItemService.GetTasksByCategoryIdAsync(categoryId);
         
         if (!response.IsSuccess)
         {
@@ -87,7 +80,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTasksByStatus(string status)
     {
-        var response = await _taskItemService.GetTasksByStatusAsync(status);
+        var response = await taskItemService.GetTasksByStatusAsync(status);
         
         if (!response.IsSuccess)
         {
@@ -103,7 +96,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTasksByPriority(string priority)
     {
-        var response = await _taskItemService.GetTasksByPriorityAsync(priority);
+        var response = await taskItemService.GetTasksByPriorityAsync(priority);
         
         if (!response.IsSuccess)
         {
@@ -119,7 +112,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTasksDueToday()
     {
-        var response = await _taskItemService.GetTasksDueTodayAsync();
+        var response = await taskItemService.GetTasksDueTodayAsync();
         
         if (!response.IsSuccess)
         {
@@ -135,7 +128,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetTasksOverdue()
     {
-        var response = await _taskItemService.GetTasksOverdueAsync();
+        var response = await taskItemService.GetTasksOverdueAsync();
         
         if (!response.IsSuccess)
         {
@@ -162,7 +155,7 @@ public class TaskItemController : ControllerBase
             });
         }
         
-        var response = await _taskItemService.CreateTaskAsync(createTaskDto, userId);
+        var response = await taskItemService.CreateTaskAsync(createTaskDto, userId);
         
         if (!response.IsSuccess)
         {
@@ -179,7 +172,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateTask(int id, [FromBody] UpdateTaskItemDto updateTaskDto)
     {
-        var response = await _taskItemService.UpdateTaskAsync(id, updateTaskDto);
+        var response = await taskItemService.UpdateTaskAsync(id, updateTaskDto);
         
         if (!response.IsSuccess)
         {
@@ -200,7 +193,7 @@ public class TaskItemController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteTask(int id)
     {
-        var response = await _taskItemService.DeleteTaskAsync(id);
+        var response = await taskItemService.DeleteTaskAsync(id);
         
         if (!response.IsSuccess)
         {

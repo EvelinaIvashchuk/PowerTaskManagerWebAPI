@@ -6,17 +6,8 @@ using PowerTaskManager.Services.Interfaces;
 
 namespace PowerTaskManager.Services;
 
-public class UserService : IUserService
+public class UserService(IUnitOfWork unitOfWork, UserManager<User> userManager) : IUserService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly UserManager<User> _userManager;
-    
-    public UserService(IUnitOfWork unitOfWork, UserManager<User> userManager)
-    {
-        _unitOfWork = unitOfWork;
-        _userManager = userManager;
-    }
-    
     public async Task<ApiResponseDto<PagedResponseDto<UserDto>>> GetAllUsersAsync(UserQueryParameters parameters)
     {
         try
@@ -65,10 +56,10 @@ public class UserService : IUserService
             }
             
             // Get total count
-            var totalCount = await _unitOfWork.Users.CountAsync(filter);
+            var totalCount = await unitOfWork.Users.CountAsync(filter);
             
             // Get paginated data
-            var users = await _unitOfWork.Users.GetAsync(
+            var users = await unitOfWork.Users.GetAsync(
                 filter,
                 orderBy,
                 "Tasks",
@@ -108,7 +99,7 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Id == id, "Tasks");
+            var user = await unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Id == id, "Tasks");
             
             if (user == null)
             {
@@ -137,7 +128,7 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _unitOfWork.Users.GetUserWithTasksAsync(id);
+            var user = await unitOfWork.Users.GetUserWithTasksAsync(id);
             
             if (user == null)
             {
@@ -166,7 +157,7 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await userManager.FindByIdAsync(id);
             
             if (user == null)
             {
@@ -187,7 +178,7 @@ public class UserService : IUserService
             if (!string.IsNullOrEmpty(updateUserDto.Email) && updateUserDto.Email != user.Email)
             {
                 // Check if email is already in use
-                var existingUser = await _userManager.FindByEmailAsync(updateUserDto.Email);
+                var existingUser = await userManager.FindByEmailAsync(updateUserDto.Email);
                 
                 if (existingUser != null)
                 {
@@ -200,7 +191,7 @@ public class UserService : IUserService
                 user.NormalizedUserName = updateUserDto.Email.ToUpper();
             }
             
-            var result = await _userManager.UpdateAsync(user);
+            var result = await userManager.UpdateAsync(user);
             
             if (!result.Succeeded)
             {
@@ -209,7 +200,7 @@ public class UserService : IUserService
             }
             
             // Get updated user with tasks
-            var updatedUser = await _unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Id == id, "Tasks");
+            var updatedUser = await unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Id == id, "Tasks");
             
             var userDto = new UserDto
             {
@@ -233,7 +224,7 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await userManager.FindByIdAsync(id);
             
             if (user == null)
             {
@@ -241,14 +232,14 @@ public class UserService : IUserService
             }
             
             // Check if user has tasks
-            var userWithTasks = await _unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Id == id, "Tasks");
+            var userWithTasks = await unitOfWork.Users.GetFirstOrDefaultAsync(u => u.Id == id, "Tasks");
             
             if (userWithTasks.Tasks.Any())
             {
                 return ApiResponseDto<bool>.Failure($"Cannot delete user with ID {id} because they have associated tasks");
             }
             
-            var result = await _userManager.DeleteAsync(user);
+            var result = await userManager.DeleteAsync(user);
             
             if (!result.Succeeded)
             {

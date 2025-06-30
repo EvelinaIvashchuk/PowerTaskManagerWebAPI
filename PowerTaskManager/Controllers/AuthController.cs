@@ -7,21 +7,14 @@ namespace PowerTaskManager.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    private readonly IAuthService _authService;
-    
-    public AuthController(IAuthService authService)
-    {
-        _authService = authService;
-    }
-    
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        var response = await _authService.RegisterAsync(registerDto);
+        var response = await authService.RegisterAsync(registerDto);
         
         if (!response.IsSuccess)
         {
@@ -36,7 +29,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var response = await _authService.LoginAsync(loginDto);
+        var response = await authService.LoginAsync(loginDto);
         
         if (!response.IsSuccess)
         {
@@ -51,7 +44,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
     {
-        var response = await _authService.RefreshTokenAsync(refreshTokenDto);
+        var response = await authService.RefreshTokenAsync(refreshTokenDto);
         
         if (!response.IsSuccess)
         {
@@ -79,7 +72,7 @@ public class AuthController : ControllerBase
             });
         }
         
-        var response = await _authService.ChangePasswordAsync(userId, changePasswordDto);
+        var response = await authService.ChangePasswordAsync(userId, changePasswordDto);
         
         if (!response.IsSuccess)
         {
@@ -106,7 +99,7 @@ public class AuthController : ControllerBase
             });
         }
         
-        var response = await _authService.LogoutAsync(userId);
+        var response = await authService.LogoutAsync(userId);
         
         return Ok(response);
     }

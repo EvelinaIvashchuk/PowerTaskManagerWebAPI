@@ -7,9 +7,9 @@ namespace PowerTaskManager.Repositories;
 
 public class UserRepository(ApplicationDbContext context) : Repository<User>(context), IUserRepository
 {
-    public async Task<User> GetUserWithTasksAsync(string userId)
+    public async Task<User?> GetUserWithTasksAsync(string userId)
     {
-        return await _dbSet.Where(u => u.Id == userId)
+        return await DbSet.Where(u => u.Id == userId)
             .Include(u => u.Tasks)
             .ThenInclude(t => t.Category)
             .FirstOrDefaultAsync();
@@ -17,7 +17,7 @@ public class UserRepository(ApplicationDbContext context) : Repository<User>(con
     
     public async Task<IEnumerable<User>> GetUsersWithTasksAsync()
     {
-        return await _dbSet
+        return await DbSet
             .Include(u => u.Tasks)
             .ThenInclude(t => t.Category)
             .ToListAsync();

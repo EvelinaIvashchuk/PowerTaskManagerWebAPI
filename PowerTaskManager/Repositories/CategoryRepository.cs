@@ -5,15 +5,11 @@ using PowerTaskManager.Repositories.Interfaces;
 
 namespace PowerTaskManager.Repositories;
 
-public class CategoryRepository : Repository<Category>, ICategoryRepository
+public class CategoryRepository(ApplicationDbContext context) : Repository<Category>(context), ICategoryRepository
 {
-    public CategoryRepository(ApplicationDbContext context) : base(context)
+    public async Task<Category?> GetCategoryWithTasksAsync(int categoryId)
     {
-    }
-    
-    public async Task<Category> GetCategoryWithTasksAsync(int categoryId)
-    {
-        return await _dbSet.Where(c => c.Id == categoryId)
+        return await DbSet.Where(c => c.Id == categoryId)
             .Include(c => c.Tasks)
             .ThenInclude(t => t.User)
             .FirstOrDefaultAsync();
@@ -21,7 +17,7 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
     
     public async Task<IEnumerable<Category>> GetCategoriesWithTasksAsync()
     {
-        return await _dbSet
+        return await DbSet
             .Include(c => c.Tasks)
             .ThenInclude(t => t.User)
             .ToListAsync();

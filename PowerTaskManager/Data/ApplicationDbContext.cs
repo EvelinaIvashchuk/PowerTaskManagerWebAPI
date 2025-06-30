@@ -4,13 +4,8 @@ using PowerTaskManager.Models;
 
 namespace PowerTaskManager.Data;
 
-public class ApplicationDbContext : IdentityDbContext<User>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-    
     public DbSet<TaskItem> Tasks { get; set; }
     public DbSet<Category> Categories { get; set; }
     

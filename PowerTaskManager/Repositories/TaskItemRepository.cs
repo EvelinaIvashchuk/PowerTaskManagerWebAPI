@@ -10,21 +10,21 @@ public class TaskItemRepository(ApplicationDbContext context) : Repository<TaskI
 {
     public async Task<IEnumerable<TaskItem>> GetTasksByUserIdAsync(string userId)
     {
-        return await _dbSet.Where(t => t.UserId == userId)
+        return await DbSet.Where(t => t.UserId == userId)
             .Include(t => t.Category)
             .ToListAsync();
     }
     
     public async Task<IEnumerable<TaskItem>> GetTasksByCategoryIdAsync(int categoryId)
     {
-        return await _dbSet.Where(t => t.CategoryId == categoryId)
+        return await DbSet.Where(t => t.CategoryId == categoryId)
             .Include(t => t.User)
             .ToListAsync();
     }
     
     public async Task<IEnumerable<TaskItem>> GetTasksByStatusAsync(TaskStatus status)
     {
-        return await _dbSet.Where(t => t.Status == status)
+        return await DbSet.Where(t => t.Status == status)
             .Include(t => t.User)
             .Include(t => t.Category)
             .ToListAsync();
@@ -32,7 +32,7 @@ public class TaskItemRepository(ApplicationDbContext context) : Repository<TaskI
     
     public async Task<IEnumerable<TaskItem>> GetTasksByPriorityAsync(TaskPriority priority)
     {
-        return await _dbSet.Where(t => t.Priority == priority)
+        return await DbSet.Where(t => t.Priority == priority)
             .Include(t => t.User)
             .Include(t => t.Category)
             .ToListAsync();
@@ -41,7 +41,7 @@ public class TaskItemRepository(ApplicationDbContext context) : Repository<TaskI
     public async Task<IEnumerable<TaskItem>> GetTasksDueTodayAsync()
     {
         var today = DateTime.Today;
-        return await _dbSet.Where(t => t.DueDate.Date == today)
+        return await DbSet.Where(t => t.DueDate.Date == today)
             .Include(t => t.User)
             .Include(t => t.Category)
             .ToListAsync();
@@ -50,7 +50,7 @@ public class TaskItemRepository(ApplicationDbContext context) : Repository<TaskI
     public async Task<IEnumerable<TaskItem>> GetTasksOverdueAsync()
     {
         var today = DateTime.Today;
-        return await _dbSet.Where(t => t.DueDate.Date < today && t.Status != TaskStatus.Completed)
+        return await DbSet.Where(t => t.DueDate.Date < today && t.Status != TaskStatus.Completed)
             .Include(t => t.User)
             .Include(t => t.Category)
             .ToListAsync();

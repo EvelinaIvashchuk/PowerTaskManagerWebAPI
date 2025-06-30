@@ -5,20 +5,14 @@ using PowerTaskManager.Repositories.Interfaces;
 
 namespace PowerTaskManager.Repositories;
 
-public class Repository<T> : IRepository<T> where T : class
+public class Repository<T>(ApplicationDbContext context) : IRepository<T>
+    where T : class
 {
-    protected readonly ApplicationDbContext _context;
-    internal DbSet<T> _dbSet;
-    
-    public Repository(ApplicationDbContext context)
-    {
-        _context = context;
-        _dbSet = context.Set<T>();
-    }
-    
+    internal readonly DbSet<T> DbSet = context.Set<T>();
+
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await DbSet.ToListAsync();
     }
     
     public async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> filter = null,
@@ -27,7 +21,7 @@ public class Repository<T> : IRepository<T> where T : class
         int? skip = null,
         int? take = null)
     {
-        IQueryable<T> query = _dbSet;
+        IQueryable<T> query = DbSet;
         
         if (filter != null)
         {
@@ -60,12 +54,12 @@ public class Repository<T> : IRepository<T> where T : class
     
     public async Task<T> GetByIdAsync(object id)
     {
-        return await _dbSet.FindAsync(id);
+        return await DbSet.FindAsync(id);
     }
     
     public async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter = null, string includeProperties = "")
     {
-        IQueryable<T> query = _dbSet;
+        IQueryable<T> query = DbSet;
         
         if (filter != null)
         {
@@ -83,43 +77,43 @@ public class Repository<T> : IRepository<T> where T : class
     
     public async Task AddAsync(T entity)
     {
-        await _dbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity);
     }
     
     public async Task AddRangeAsync(IEnumerable<T> entities)
     {
-        await _dbSet.AddRangeAsync(entities);
+        await DbSet.AddRangeAsync(entities);
     }
     
     public void Update(T entity)
     {
-        _dbSet.Attach(entity);
-        _context.Entry(entity).State = EntityState.Modified;
+        DbSet.Attach(entity);
+        context.Entry(entity).State = EntityState.Modified;
     }
     
     public async Task RemoveAsync(object id)
     {
-        T entityToRemove = await _dbSet.FindAsync(id);
+        T entityToRemove = await DbSet.FindAsync(id);
         Remove(entityToRemove);
     }
     
     public void Remove(T entity)
     {
-        if (_context.Entry(entity).State == EntityState.Detached)
+        if (context.Entry(entity).State == EntityState.Detached)
         {
-            _dbSet.Attach(entity);
+            DbSet.Attach(entity);
         }
-        _dbSet.Remove(entity);
+        DbSet.Remove(entity);
     }
     
     public void RemoveRange(IEnumerable<T> entities)
     {
-        _dbSet.RemoveRange(entities);
+        DbSet.RemoveRange(entities);
     }
     
     public async Task<int> CountAsync(Expression<Func<T, bool>> filter = null)
     {
-        IQueryable<T> query = _dbSet;
+        IQueryable<T> query = DbSet;
         
         if (filter != null)
         {

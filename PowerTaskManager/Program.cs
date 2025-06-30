@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using PowerTaskManager.Data;
 using PowerTaskManager.DTOs.Validators;
 using PowerTaskManager.Helpers;
+using PowerTaskManager.Middleware;
 using PowerTaskManager.Models;
 using PowerTaskManager.Repositories;
 using PowerTaskManager.Repositories.Interfaces;
@@ -107,6 +108,9 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Add global error handling middleware
+app.UseErrorHandling();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

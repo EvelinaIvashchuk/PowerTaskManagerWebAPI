@@ -6,28 +6,18 @@ using PowerTaskManager.Services.Interfaces;
 
 namespace PowerTaskManager.Services;
 
-public class AuthService : IAuthService
+public class AuthService(
+    UserManager<User> userManager,
+    SignInManager<User> signInManager,
+    JwtTokenGenerator tokenGenerator)
+    : IAuthService
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
-    private readonly JwtTokenGenerator _tokenGenerator;
-    
-    public AuthService(
-        UserManager<User> userManager,
-        SignInManager<User> signInManager,
-        JwtTokenGenerator tokenGenerator)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _tokenGenerator = tokenGenerator;
-    }
-    
     public async Task<ApiResponseDto<AuthResponseDto>> RegisterAsync(RegisterDto registerDto)
     {
         try
         {
             // Check if user already exists
-            var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
+            var existingUser = await userManager.FindByEmailAsync(registerDto.Email);
             
             if (existingUser != null)
             {
@@ -44,7 +34,7 @@ public class AuthService : IAuthService
                 EmailConfirmed = true // Auto-confirm email for simplicity
             };
             
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
+            var result = await userManager.CreateAsync(user, registerDto.Password);
             
             if (!result.Succeeded)
             {
@@ -53,10 +43,10 @@ public class AuthService : IAuthService
             }
             
             // Add user to 'User' role
-            await _userManager.AddToRoleAsync(user, "User");
+            await userManager.AddToRoleAsync(user, "User");
             
             // Generate token
-            var (token, expiration) = await _tokenGenerator.GenerateTokenAsync(user);
+            var (token, expiration) = await tokenGenerator.GenerateTokenAsync(user);
             
             // Create response
             var authResponse = new AuthResponseDto
@@ -90,7 +80,7 @@ public class AuthService : IAuthService
         try
         {
             // Find user by email
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            var user = await userManager.FindByEmailAsync(loginDto.Email);
             
             if (user == null)
             {
@@ -98,7 +88,7 @@ public class AuthService : IAuthService
             }
             
             // Check password
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
             
             if (!result.Succeeded)
             {
@@ -106,7 +96,7 @@ public class AuthService : IAuthService
             }
             
             // Generate token
-            var (token, expiration) = await _tokenGenerator.GenerateTokenAsync(user);
+            var (token, expiration) = await tokenGenerator.GenerateTokenAsync(user);
             
             // Create response
             var authResponse = new AuthResponseDto
@@ -146,7 +136,7 @@ public class AuthService : IAuthService
     {
         try
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
             
             if (user == null)
             {
@@ -154,7 +144,7 @@ public class AuthService : IAuthService
             }
             
             // Check current password
-            var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, changePasswordDto.CurrentPassword);
+            var isCurrentPasswordValid = await userManager.CheckPasswordAsync(user, changePasswordDto.CurrentPassword);
             
             if (!isCurrentPasswordValid)
             {
@@ -162,7 +152,7 @@ public class AuthService : IAuthService
             }
             
             // Change password
-            var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+            var result = await userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
             
             if (!result.Succeeded)
             {
@@ -184,7 +174,7 @@ public class AuthService : IAuthService
         {
             // For simplicity, we'll just return a success response
             // In a real application with refresh tokens, you would invalidate the refresh token
-            await _signInManager.SignOutAsync();
+            await signInManager.SignOutAsync();
             return ApiResponseDto<bool>.Success(true, "Logout successful");
         }
         catch (Exception ex)

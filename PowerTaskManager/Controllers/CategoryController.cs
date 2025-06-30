@@ -8,22 +8,15 @@ namespace PowerTaskManager.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class CategoryController : ControllerBase
+public class CategoryController(ICategoryService categoryService) : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
-    
-    public CategoryController(ICategoryService categoryService)
-    {
-        _categoryService = categoryService;
-    }
-    
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetAllCategories([FromQuery] CategoryQueryParameters parameters)
     {
-        var response = await _categoryService.GetAllCategoriesAsync(parameters);
+        var response = await categoryService.GetAllCategoriesAsync(parameters);
         
         if (!response.IsSuccess)
         {
@@ -39,7 +32,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCategoryById(int id)
     {
-        var response = await _categoryService.GetCategoryByIdAsync(id);
+        var response = await categoryService.GetCategoryByIdAsync(id);
         
         if (!response.IsSuccess)
         {
@@ -55,7 +48,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCategoryWithTasks(int id)
     {
-        var response = await _categoryService.GetCategoryWithTasksAsync(id);
+        var response = await categoryService.GetCategoryWithTasksAsync(id);
         
         if (!response.IsSuccess)
         {
@@ -71,7 +64,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto createCategoryDto)
     {
-        var response = await _categoryService.CreateCategoryAsync(createCategoryDto);
+        var response = await categoryService.CreateCategoryAsync(createCategoryDto);
         
         if (!response.IsSuccess)
         {
@@ -88,7 +81,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDto updateCategoryDto)
     {
-        var response = await _categoryService.UpdateCategoryAsync(id, updateCategoryDto);
+        var response = await categoryService.UpdateCategoryAsync(id, updateCategoryDto);
         
         if (!response.IsSuccess)
         {
@@ -110,7 +103,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteCategory(int id)
     {
-        var response = await _categoryService.DeleteCategoryAsync(id);
+        var response = await categoryService.DeleteCategoryAsync(id);
         
         if (!response.IsSuccess)
         {

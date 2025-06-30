@@ -8,15 +8,8 @@ namespace PowerTaskManager.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class UserController : ControllerBase
+public class UserController(IUserService userService) : ControllerBase
 {
-    private readonly IUserService _userService;
-    
-    public UserController(IUserService userService)
-    {
-        _userService = userService;
-    }
-    
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -24,7 +17,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Admin")] // Only admins can see all users
     public async Task<IActionResult> GetAllUsers([FromQuery] UserQueryParameters parameters)
     {
-        var response = await _userService.GetAllUsersAsync(parameters);
+        var response = await userService.GetAllUsersAsync(parameters);
         
         if (!response.IsSuccess)
         {
@@ -50,7 +43,7 @@ public class UserController : ControllerBase
             return Forbid();
         }
         
-        var response = await _userService.GetUserByIdAsync(id);
+        var response = await userService.GetUserByIdAsync(id);
         
         if (!response.IsSuccess)
         {
@@ -76,7 +69,7 @@ public class UserController : ControllerBase
             return Forbid();
         }
         
-        var response = await _userService.GetUserWithTasksAsync(id);
+        var response = await userService.GetUserWithTasksAsync(id);
         
         if (!response.IsSuccess)
         {
@@ -103,7 +96,7 @@ public class UserController : ControllerBase
             return Forbid();
         }
         
-        var response = await _userService.UpdateUserAsync(id, updateUserDto);
+        var response = await userService.UpdateUserAsync(id, updateUserDto);
         
         if (!response.IsSuccess)
         {
@@ -135,7 +128,7 @@ public class UserController : ControllerBase
             return Forbid();
         }
         
-        var response = await _userService.DeleteUserAsync(id);
+        var response = await userService.DeleteUserAsync(id);
         
         if (!response.IsSuccess)
         {

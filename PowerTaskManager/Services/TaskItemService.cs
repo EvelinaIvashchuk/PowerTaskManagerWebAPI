@@ -7,15 +7,8 @@ using TaskStatus = PowerTaskManager.Models.TaskStatus;
 
 namespace PowerTaskManager.Services;
 
-public class TaskItemService : ITaskItemService
+public class TaskItemService(IUnitOfWork unitOfWork) : ITaskItemService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    
-    public TaskItemService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
-    
     public async Task<ApiResponseDto<PagedResponseDto<TaskItemDto>>> GetAllTasksAsync(TaskItemQueryParameters parameters)
     {
         try
@@ -92,10 +85,10 @@ public class TaskItemService : ITaskItemService
             }
             
             // Get total count
-            var totalCount = await _unitOfWork.TaskItems.CountAsync(filter);
+            var totalCount = await unitOfWork.TaskItems.CountAsync(filter);
             
             // Get paginated data
-            var tasks = await _unitOfWork.TaskItems.GetAsync(
+            var tasks = await unitOfWork.TaskItems.GetAsync(
                 filter,
                 orderBy,
                 "User,Category",
@@ -141,7 +134,7 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var task = await _unitOfWork.TaskItems.GetFirstOrDefaultAsync(t => t.Id == id, "User,Category");
+            var task = await unitOfWork.TaskItems.GetFirstOrDefaultAsync(t => t.Id == id, "User,Category");
             
             if (task == null)
             {
@@ -176,7 +169,7 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var tasks = await _unitOfWork.TaskItems.GetTasksByUserIdAsync(userId);
+            var tasks = await unitOfWork.TaskItems.GetTasksByUserIdAsync(userId);
             
             var taskDtos = tasks.Select(t => new TaskItemDto
             {
@@ -206,7 +199,7 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var tasks = await _unitOfWork.TaskItems.GetTasksByCategoryIdAsync(categoryId);
+            var tasks = await unitOfWork.TaskItems.GetTasksByCategoryIdAsync(categoryId);
             
             var taskDtos = tasks.Select(t => new TaskItemDto
             {
@@ -241,7 +234,7 @@ public class TaskItemService : ITaskItemService
                 return ApiResponseDto<IEnumerable<TaskItemDto>>.Failure($"Invalid status: {status}");
             }
             
-            var tasks = await _unitOfWork.TaskItems.GetTasksByStatusAsync(taskStatus);
+            var tasks = await unitOfWork.TaskItems.GetTasksByStatusAsync(taskStatus);
             
             var taskDtos = tasks.Select(t => new TaskItemDto
             {
@@ -276,7 +269,7 @@ public class TaskItemService : ITaskItemService
                 return ApiResponseDto<IEnumerable<TaskItemDto>>.Failure($"Invalid priority: {priority}");
             }
             
-            var tasks = await _unitOfWork.TaskItems.GetTasksByPriorityAsync(taskPriority);
+            var tasks = await unitOfWork.TaskItems.GetTasksByPriorityAsync(taskPriority);
             
             var taskDtos = tasks.Select(t => new TaskItemDto
             {
@@ -306,7 +299,7 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var tasks = await _unitOfWork.TaskItems.GetTasksDueTodayAsync();
+            var tasks = await unitOfWork.TaskItems.GetTasksDueTodayAsync();
             
             var taskDtos = tasks.Select(t => new TaskItemDto
             {
@@ -336,7 +329,7 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var tasks = await _unitOfWork.TaskItems.GetTasksOverdueAsync();
+            var tasks = await unitOfWork.TaskItems.GetTasksOverdueAsync();
             
             var taskDtos = tasks.Select(t => new TaskItemDto
             {
@@ -385,11 +378,11 @@ public class TaskItemService : ITaskItemService
                 CategoryId = createTaskDto.CategoryId
             };
             
-            await _unitOfWork.TaskItems.AddAsync(task);
-            await _unitOfWork.SaveAsync();
+            await unitOfWork.TaskItems.AddAsync(task);
+            await unitOfWork.SaveAsync();
             
             // Get the created task with related entities
-            var createdTask = await _unitOfWork.TaskItems.GetFirstOrDefaultAsync(t => t.Id == task.Id, "User,Category");
+            var createdTask = await unitOfWork.TaskItems.GetFirstOrDefaultAsync(t => t.Id == task.Id, "User,Category");
             
             var taskDto = new TaskItemDto
             {
@@ -419,7 +412,7 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var task = await _unitOfWork.TaskItems.GetByIdAsync(id);
+            var task = await unitOfWork.TaskItems.GetByIdAsync(id);
             
             if (task == null)
             {
@@ -461,11 +454,11 @@ public class TaskItemService : ITaskItemService
             
             task.UpdatedAt = DateTime.UtcNow;
             
-            _unitOfWork.TaskItems.Update(task);
-            await _unitOfWork.SaveAsync();
+            unitOfWork.TaskItems.Update(task);
+            await unitOfWork.SaveAsync();
             
             // Get the updated task with related entities
-            var updatedTask = await _unitOfWork.TaskItems.GetFirstOrDefaultAsync(t => t.Id == id, "User,Category");
+            var updatedTask = await unitOfWork.TaskItems.GetFirstOrDefaultAsync(t => t.Id == id, "User,Category");
             
             var taskDto = new TaskItemDto
             {
@@ -495,15 +488,15 @@ public class TaskItemService : ITaskItemService
     {
         try
         {
-            var task = await _unitOfWork.TaskItems.GetByIdAsync(id);
+            var task = await unitOfWork.TaskItems.GetByIdAsync(id);
             
             if (task == null)
             {
                 return ApiResponseDto<bool>.Failure($"Task with ID {id} not found");
             }
             
-            _unitOfWork.TaskItems.Remove(task);
-            await _unitOfWork.SaveAsync();
+            unitOfWork.TaskItems.Remove(task);
+            await unitOfWork.SaveAsync();
             
             return ApiResponseDto<bool>.Success(true, "Task deleted successfully");
         }

@@ -10,7 +10,7 @@ public static class DbInitializer
     public static async Task Initialize(ApplicationDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
     {
         // Ensure database is created and apply migrations
-        context.Database.EnsureCreated();
+        await context.Database.EnsureCreatedAsync();
         
         // Seed roles if they don't exist
         if (!await roleManager.Roles.AnyAsync())
@@ -52,10 +52,10 @@ public static class DbInitializer
         {
             var categories = new List<Category>
             {
-                new Category { Name = "Work", Description = "Work-related tasks", Color = "#FF0000" },
-                new Category { Name = "Personal", Description = "Personal tasks", Color = "#00FF00" },
-                new Category { Name = "Study", Description = "Study-related tasks", Color = "#0000FF" },
-                new Category { Name = "Health", Description = "Health and fitness tasks", Color = "#FFFF00" }
+                new() { Name = "Work", Description = "Work-related tasks", Color = "#FF0000" },
+                new() { Name = "Personal", Description = "Personal tasks", Color = "#00FF00" },
+                new() { Name = "Study", Description = "Study-related tasks", Color = "#0000FF" },
+                new() { Name = "Health", Description = "Health and fitness tasks", Color = "#FFFF00" }
             };
             
             await context.Categories.AddRangeAsync(categories);
@@ -71,7 +71,7 @@ public static class DbInitializer
             
             var tasks = new List<TaskItem>
             {
-                new TaskItem
+                new()
                 {
                     Title = "Complete project documentation",
                     Description = "Write comprehensive documentation for the project",
@@ -81,7 +81,7 @@ public static class DbInitializer
                     UserId = admin.Id,
                     CategoryId = categories.First(c => c.Name == "Work").Id
                 },
-                new TaskItem
+                new()
                 {
                     Title = "Prepare presentation",
                     Description = "Create slides for the upcoming meeting",
@@ -91,7 +91,7 @@ public static class DbInitializer
                     UserId = admin.Id,
                     CategoryId = categories.First(c => c.Name == "Work").Id
                 },
-                new TaskItem
+                new()
                 {
                     Title = "Go grocery shopping",
                     Description = "Buy groceries for the week",
@@ -101,7 +101,7 @@ public static class DbInitializer
                     UserId = user.Id,
                     CategoryId = categories.First(c => c.Name == "Personal").Id
                 },
-                new TaskItem
+                new()
                 {
                     Title = "Study for exam",
                     Description = "Review materials for the upcoming exam",
