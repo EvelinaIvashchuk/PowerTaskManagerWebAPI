@@ -1,0 +1,6 @@
+@PowerTaskManager_HostAddress = http://localhost:5112
+
+GET {{PowerTaskManager_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
